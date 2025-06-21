@@ -267,6 +267,33 @@ namespace SAM.Core
             }
         }
 
+        public static void SetAutoLoginUserForOfflineMode(Account account)
+        {
+            RegistryKey localKey;
+
+            if (Environment.Is64BitOperatingSystem)
+            {
+                localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+            }
+            else
+            {
+                localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
+            }
+
+            try
+            {
+                localKey = localKey.OpenSubKey(@"Software\\Valve\\Steam", true);
+                localKey.SetValue("AutoLoginUser", account.Name.ToLower(), RegistryValueKind.String);
+                localKey.SetValue("RememberPassword", 1, RegistryValueKind.DWord);
+                localKey.Close();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("设置离线登录失败\n\n" + e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine(e.StackTrace);
+            }
+        }
+
         public static string CheckSteamPath()
         {
             var settingsFile = new IniFile(SAMSettings.FILE_NAME);

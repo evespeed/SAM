@@ -45,6 +45,8 @@ namespace SAM.Core
         public int NumberOfGameBans { get; set; }
 
         public string EconomyBan { get; set; }
+        
+        public bool OfflineMode { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

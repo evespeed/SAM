@@ -776,6 +776,22 @@ namespace SAM.Views
                         timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
                         timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
 
+                        // 设置离线模式文本块属性
+                        var offlineModeTextBlock = new TextBlock();
+                        offlineModeTextBlock.Width = settings.User.ButtonSize;
+                        offlineModeTextBlock.FontSize = settings.User.ButtonSize / 10;
+                        offlineModeTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
+                        offlineModeTextBlock.VerticalAlignment = VerticalAlignment.Top;
+                        offlineModeTextBlock.Margin = new Thickness(0, 5, 0, 0);
+                        offlineModeTextBlock.Padding = new Thickness(2, 0, 2, 0);
+                        offlineModeTextBlock.TextAlignment = TextAlignment.Center;
+                        offlineModeTextBlock.Foreground = new SolidColorBrush(Colors.White);
+                        offlineModeTextBlock.Background = new SolidColorBrush(new Color { A = 180, R = 0, G = 120, B = 215 });
+                        offlineModeTextBlock.Text = "离线登录";
+                        
+                        // 根据账号的离线模式设置决定是否显示离线登录标签
+                        offlineModeTextBlock.Visibility = account.OfflineMode ? Visibility.Visible : Visibility.Collapsed;
+
                         accountImage.Height = settings.User.ButtonSize;
                         accountImage.Width = settings.User.ButtonSize;
                         accountImage.HorizontalAlignment = HorizontalAlignment.Center;
@@ -861,6 +877,7 @@ namespace SAM.Views
 
                         accountButtonGrid.Children.Add(accountText);
                         accountButtonGrid.Children.Add(accountButton);
+                        accountButtonGrid.Children.Add(offlineModeTextBlock);
 
                         if (!settings.User.HideBanIcons && (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0))
                         {
@@ -977,9 +994,9 @@ namespace SAM.Views
             var editItem = new MenuItem();
             var exportItem = new MenuItem();
             var reloadItem = new MenuItem();
+            var offlineLoginItem = new MenuItem(); // 离线登录菜单项
 
             var setTimeoutItem = new MenuItem();
-
             var thirtyMinuteTimeoutItem = new MenuItem();
             var twoHourTimeoutItem = new MenuItem();
             var twentyOneHourTimeoutItem = new MenuItem();
@@ -987,6 +1004,13 @@ namespace SAM.Views
             var sevenDayTimeoutItem = new MenuItem();
             var customTimeoutItem = new MenuItem();
             var clearTimeoutItem = new MenuItem();
+
+            var copyMenuItem = new MenuItem();
+            var copyUsernameItem = new MenuItem();
+            var copyPasswordItem = new MenuItem();
+            var copyProfileUrlItem = new MenuItem();
+            var copySteamIdItem = new MenuItem();
+            var copyMFATokenItem = new MenuItem();
 
             thirtyMinuteTimeoutItem.Header = "30 Minutes";
             twoHourTimeoutItem.Header = "2 Hours";
@@ -1004,13 +1028,6 @@ namespace SAM.Views
             setTimeoutItem.Items.Add(customTimeoutItem);
             setTimeoutItem.Items.Add(clearTimeoutItem);
 
-            var copyMenuItem = new MenuItem();
-            var copyUsernameItem = new MenuItem();
-            var copyPasswordItem = new MenuItem();
-            var copyProfileUrlItem = new MenuItem();
-            var copySteamIdItem = new MenuItem();
-            var copyMFATokenItem = new MenuItem();
-
             if (!AccountUtils.AccountHasActiveTimeout(account))
             {
                 clearTimeoutItem.IsEnabled = false;
@@ -1022,6 +1039,9 @@ namespace SAM.Views
             editItem.Header = "Edit";
             exportItem.Header = "Export";
             reloadItem.Header = "Reload";
+            offlineLoginItem.Header = "离线模式";
+            offlineLoginItem.IsCheckable = true;
+            offlineLoginItem.IsChecked = account.OfflineMode;
             setTimeoutItem.Header = "Timeout";
             copyMenuItem.Header = "Copy";
             copyUsernameItem.Header = "Username";
@@ -1034,6 +1054,10 @@ namespace SAM.Views
             editItem.Click += delegate { EditEntryAsync(account); };
             exportItem.Click += delegate { ExportAccount(account); };
             reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(account); };
+            offlineLoginItem.Click += delegate { 
+                account.OfflineMode = !account.OfflineMode; 
+                SerializeAccounts();
+            };
             thirtyMinuteTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(account, DateTime.Now.AddMinutes(30)); };
             twoHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(account, DateTime.Now.AddHours(2)); };
             twentyOneHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(account, DateTime.Now.AddHours(21)); };
@@ -1049,6 +1073,7 @@ namespace SAM.Views
             accountContext.Items.Add(editItem);
             accountContext.Items.Add(exportItem);
             accountContext.Items.Add(reloadItem);
+            accountContext.Items.Add(offlineLoginItem);
             accountContext.Items.Add(copyMenuItem);
             accountContext.Items.Add(setTimeoutItem);
 
@@ -1235,13 +1260,9 @@ namespace SAM.Views
 
         private void Login(int index)
         {
-            if (index >= 0 && index <= accounts.Count)
+            if (index >= 0 && index < accounts.Count)
             {
                 Login(accounts[index]);
-            }
-            else
-            {
-                MessageBox.Show("Index " + index + " is out of bounds!");
             }
         }
 
@@ -1261,7 +1282,42 @@ namespace SAM.Views
             new Thread(() => {
                 try
                 {
-                    Login(account, 0);
+                    // 根据账户的OfflineMode属性决定使用正常登录还是离线登录
+                    if (account.OfflineMode)
+                    {
+                        // 关闭已经运行的Steam
+                        if (!settings.User.SandboxMode)
+                        {
+                            ShutdownSteam();
+                        }
+
+                        // 设置注册表中的AutoLoginUser键
+                        AccountUtils.SetAutoLoginUserForOfflineMode(account);
+
+                        // 启动Steam，无需额外参数
+                        ProcessStartInfo startInfo = new ProcessStartInfo
+                        {
+                            FileName = settings.User.SteamPath + "steam.exe",
+                            WorkingDirectory = settings.User.SteamPath,
+                            UseShellExecute = true,
+                            Arguments = ""
+                        };
+
+                        try
+                        {
+                            Process.Start(startInfo);
+                        }
+                        catch (Exception m)
+                        {
+                            MessageBox.Show("启动Steam时出错\n\n" + m.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        // 使用正常登录方式
+                        Login(account, 0);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -2732,6 +2788,15 @@ namespace SAM.Views
             foreach (DataGridColumn column in AccountsDataGrid.Columns)
             {
                 settings.File.Write(settings.ListViewColumns[column.Header.ToString()], column.DisplayIndex.ToString(), SAMSettings.SECTION_COLUMNS);
+            }
+        }
+
+        private void AccountsDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.Column.Header.ToString() == "离线模式")
+            {
+                // 保存账号信息
+                SerializeAccounts();
             }
         }
 

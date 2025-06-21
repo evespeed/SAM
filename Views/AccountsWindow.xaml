@@ -118,14 +118,14 @@
                     </Style>
                 </Grid.Resources>
                 <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0" Cursor="ScrollAll" />
-                <DataGrid x:Name="AccountsDataGrid" Margin="0,20,0,0" AutoGenerateColumns="False" Visibility="Collapsed" IsReadOnly="True" MouseDoubleClick="AccountsDataGrid_MouseDoubleClick" ContextMenuOpening="AccountsDataGrid_ContextMenuOpening" GridLinesVisibility="Horizontal" PreviewMouseRightButtonDown="AccountsDataGrid_PreviewMouseRightButtonDown" SelectionMode="Single" ColumnReordered="AccountsDataGrid_ColumnReordered" PreviewKeyDown="AccountsDataGrid_PreviewKeyDown">
+                <DataGrid x:Name="AccountsDataGrid" Margin="0,20,0,0" AutoGenerateColumns="False" Visibility="Collapsed" IsReadOnly="False" MouseDoubleClick="AccountsDataGrid_MouseDoubleClick" ContextMenuOpening="AccountsDataGrid_ContextMenuOpening" GridLinesVisibility="Horizontal" PreviewMouseRightButtonDown="AccountsDataGrid_PreviewMouseRightButtonDown" SelectionMode="Single" ColumnReordered="AccountsDataGrid_ColumnReordered" PreviewKeyDown="AccountsDataGrid_PreviewKeyDown" CellEditEnding="AccountsDataGrid_CellEditEnding">
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
                         </Style>
                     </DataGrid.ColumnHeaderStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name">
+                        <DataGridTextColumn Header="Name" IsReadOnly="True">
                             <DataGridTextColumn.Binding>
                                 <MultiBinding Converter="{StaticResource PriorityMultiValueConverter}">
                                     <Binding Path="Alias" />
@@ -133,7 +133,7 @@
                                 </MultiBinding>
                             </DataGridTextColumn.Binding>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Description" MaxWidth="250" Binding="{Binding Description}">
+                        <DataGridTextColumn Header="Description" MaxWidth="250" Binding="{Binding Description}" IsReadOnly="True">
                             <DataGridTextColumn.ElementStyle>
                                 <Style>
                                     <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
@@ -141,11 +141,12 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Timeout" MinWidth="80" Binding="{Binding TimeoutTimeLeft}" />
-                        <DataGridTextColumn Header="VAC Bans" Binding="{Binding NumberOfVACBans}" />
-                        <DataGridTextColumn Header="Game Bans" Binding="{Binding NumberOfGameBans}" />
-                        <DataGridTextColumn Header="Economy Ban" Binding="{Binding EconomyBan}" />
-                        <DataGridTextColumn Header="Last Ban (Days)" Binding="{Binding DaysSinceLastBan}" />
+                        <DataGridTextColumn Header="Timeout" MinWidth="80" Binding="{Binding TimeoutTimeLeft}" IsReadOnly="True" />
+                        <DataGridCheckBoxColumn Header="离线模式" Binding="{Binding OfflineMode}" />
+                        <DataGridTextColumn Header="VAC Bans" Binding="{Binding NumberOfVACBans}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Game Bans" Binding="{Binding NumberOfGameBans}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Economy Ban" Binding="{Binding EconomyBan}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Last Ban (Days)" Binding="{Binding DaysSinceLastBan}" IsReadOnly="True" />
                     </DataGrid.Columns>
                 </DataGrid>
                 <Grid x:Name="AddButtonGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0">
