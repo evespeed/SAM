@@ -799,7 +799,7 @@ namespace SAM.Views
 
                         accountButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
                         accountButtonGrid.VerticalAlignment = VerticalAlignment.Top;
-                        accountButtonGrid.Margin = new Thickness(10 + xCounter * buttonOffset, yCounter * buttonOffset, 0, 0); // 添加左侧间隙10像素
+                        accountButtonGrid.Margin = new Thickness(10 + xCounter * buttonOffset, yCounter * buttonOffset, 0, 0); // 只添加左侧10像素间隙
 
                         accountButton.Height = settings.User.ButtonSize;
                         accountButton.Width = settings.User.ButtonSize;
@@ -2665,8 +2665,9 @@ namespace SAM.Views
 
         private void SetMainScrollViewerBarsVisibility(ScrollBarVisibility visibility)
         {
-            MainScrollViewer.VerticalScrollBarVisibility = visibility;
-            MainScrollViewer.HorizontalScrollBarVisibility = visibility;
+            // 始终禁用滚动条，避免显示滚动条
+            MainScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+            MainScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
         }
 
         private void SetWindowSettingsIntoScreenArea()

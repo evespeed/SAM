@@ -7,7 +7,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar" 
         xmlns:local="clr-namespace:SAM.Views"
         xmlns:wpf="clr-namespace:SAM.Wpf" xmlns:core="clr-namespace:SAM.Core"
-                 mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="Manual" ResizeMode="CanMinimize" Title="SAM" 
+                 mc:Ignorable="d" Height="180" Width="148" WindowStartupLocation="Manual" ResizeMode="CanMinimize" Title="SAM" 
                  StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged" 
                  SizeChanged="MetroWindow_SizeChanged" Closing="AccountsWindow_Closing" AllowsTransparency="True">
     <mah:MetroWindow.IconTemplate>
@@ -105,7 +105,7 @@
         </Style>
     </Window.Resources>
     <Grid x:Name="MainGrid">
-        <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" CanContentScroll="True" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel">
+        <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" CanContentScroll="True" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel">
             <Grid x:Name="ScrollViewerGrid">
                 <Grid.Resources>
                     <Style TargetType="DataGridCell">
