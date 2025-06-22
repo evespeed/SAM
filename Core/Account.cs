@@ -48,6 +48,16 @@ namespace SAM.Core
         
         public bool OfflineMode { get; set; }
 
+        public DateTime? LastLoginTime { get; set; }
+
+        private string lastLoginTimeDisplay;
+        
+        public string LastLoginTimeDisplay 
+        { 
+            get { return lastLoginTimeDisplay; } 
+            set { lastLoginTimeDisplay = value; OnPropertyChanged(); } 
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")

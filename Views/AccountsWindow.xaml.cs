@@ -667,6 +667,26 @@ namespace SAM.Views
             {
                 foreach (var account in accounts)
                 {
+                    // Initialize timeout left text.
+                    if (account.Timeout != null && account.Timeout > DateTime.Now)
+                    {
+                        account.TimeoutTimeLeft = AccountUtils.FormatTimespanString(account.Timeout.Value - DateTime.Now);
+                    }
+                    else
+                    {
+                        account.TimeoutTimeLeft = "";
+                    }
+
+                    // Initialize last login time display
+                    if (account.LastLoginTime != null)
+                    {
+                        account.LastLoginTimeDisplay = ((DateTime)account.LastLoginTime).ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                    else
+                    {
+                        account.LastLoginTimeDisplay = "";
+                    }
+
                     string tempPass = StringCipher.Decrypt(account.Password, eKey);
 
                     if (seedAcc)
@@ -1306,6 +1326,15 @@ namespace SAM.Views
                         try
                         {
                             Process.Start(startInfo);
+                            
+                            // 更新最后登录时间
+                            account.LastLoginTime = DateTime.Now;
+                            account.LastLoginTimeDisplay = ((DateTime)account.LastLoginTime).ToString("yyyy-MM-dd HH:mm:ss");
+                            
+                            // 使用Dispatcher.Invoke确保在UI线程上调用SerializeAccounts
+                            Dispatcher.Invoke(() => {
+                                SerializeAccounts();
+                            });
                         }
                         catch (Exception m)
                         {
@@ -1337,7 +1366,9 @@ namespace SAM.Views
         {
             if (tryCount == 0)
             {
-                loginThreads.Add(Thread.CurrentThread);
+                Thread currentThread = Thread.CurrentThread;
+                currentThread.Name = accounts.IndexOf(account).ToString();
+                loginThreads.Add(currentThread);
             }
 
             if (tryCount == maxRetry)
@@ -1845,6 +1876,37 @@ namespace SAM.Views
 
         private void PostLogin()
         {
+            // 更新当前账户的最后登录时间
+            if (accounts != null && accounts.Count > 0)
+            {
+                // 找到当前登录的账户
+                Account currentAccount = null;
+                foreach (Thread thread in loginThreads)
+                {
+                    if (thread.IsAlive && thread.Name != null)
+                    {
+                        int index = Convert.ToInt32(thread.Name);
+                        if (index >= 0 && index < accounts.Count)
+                        {
+                            currentAccount = accounts[index];
+                            break;
+                        }
+                    }
+                }
+
+                if (currentAccount != null)
+                {
+                    // 更新最后登录时间
+                    currentAccount.LastLoginTime = DateTime.Now;
+                    currentAccount.LastLoginTimeDisplay = ((DateTime)currentAccount.LastLoginTime).ToString("yyyy-MM-dd HH:mm:ss");
+                    
+                    // 使用Dispatcher.Invoke确保在UI线程上调用SerializeAccounts
+                    Dispatcher.Invoke(() => {
+                        SerializeAccounts();
+                    });
+                }
+            }
+
             if (!loginAllSequence)
             {
                 if (settings.User.ClearUserData)
@@ -1888,6 +1950,9 @@ namespace SAM.Views
                     case SortType.Random:
                         accounts = accounts.OrderBy(x => Guid.NewGuid()).ToList();
                         break;
+                    case SortType.LastLogin:
+                        accounts = accounts.OrderByDescending(x => x.LastLoginTime ?? DateTime.MinValue).ToList();
+                        break;
                 }
 
                 if (hash != null)
@@ -1904,7 +1969,10 @@ namespace SAM.Views
                     }
                 }
 
-                SerializeAccounts();
+                // 使用Dispatcher.Invoke确保在UI线程上调用SerializeAccounts
+                Dispatcher.Invoke(() => {
+                    SerializeAccounts();
+                });
             }
         }
 
@@ -1925,7 +1993,11 @@ namespace SAM.Views
                 AccountUtils.Serialize(accounts);
             }
 
-            RefreshWindow(dataFile);
+            // 使用Dispatcher.Invoke确保UI操作在UI线程上执行
+            Dispatcher.Invoke(() =>
+            {
+                RefreshWindow(dataFile);
+            });
         }
 
         private void ExportAccount(Account account)
@@ -2232,6 +2304,11 @@ namespace SAM.Views
         private void ShuffleAccounts_Click(object sender, RoutedEventArgs e)
         {
             SortAccounts(SortType.Random);
+        }
+
+        private void SortLastLogin_Click(object sender, RoutedEventArgs e)
+        {
+            SortAccounts(SortType.LastLogin);
         }
 
         private void ImportFromFileMenuItem_Click(object sender, RoutedEventArgs e)

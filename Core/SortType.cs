@@ -5,6 +5,7 @@
         Username,
         Alias,
         Banned,
-        Random
+        Random,
+        LastLogin
     }
 }

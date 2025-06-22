@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:tb="http://www.hardcodet.net/taskbar" 
         xmlns:local="clr-namespace:SAM.Views"
-        xmlns:wpf="clr-namespace:SAM.Wpf" xmlns:core="clr-namespace:SAM.Core" d:DataContext="{d:DesignInstance Type=core:Account}"
+        xmlns:wpf="clr-namespace:SAM.Wpf" xmlns:core="clr-namespace:SAM.Core"
                  mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="Manual" ResizeMode="CanMinimize" Title="SAM" 
                  StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged" 
                  SizeChanged="MetroWindow_SizeChanged" Closing="AccountsWindow_Closing" AllowsTransparency="True">
@@ -142,6 +142,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
                         <DataGridTextColumn Header="Timeout" MinWidth="80" Binding="{Binding TimeoutTimeLeft}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="最近登录" MinWidth="120" Binding="{Binding LastLoginTimeDisplay}" IsReadOnly="True" />
                         <DataGridCheckBoxColumn Header="离线模式" Binding="{Binding OfflineMode}" />
                         <DataGridTextColumn Header="VAC Bans" Binding="{Binding NumberOfVACBans}" IsReadOnly="True" />
                         <DataGridTextColumn Header="Game Bans" Binding="{Binding NumberOfGameBans}" IsReadOnly="True" />
@@ -212,6 +213,7 @@
                                     <MenuItem Header="Alias" Click="SortAlias_Click"/>
                                     <MenuItem Header="Banned" Click="SortBanned_Click"/>
                                     <MenuItem Header="Random" Click="ShuffleAccounts_Click"/>
+                                    <MenuItem Header="最近登录时间" Click="SortLastLogin_Click"/>
                                 </MenuItem>
                             </MenuItem>
                             <MenuItem Header="Help" Padding="{DynamicResource MenuItemPadding}">
