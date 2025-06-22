@@ -661,7 +661,7 @@ namespace SAM.Views
             int xCounter = 0;
             int yCounter = 0;
 
-            int buttonOffset = settings.User.ButtonSize + 5;
+                                    int buttonOffset = settings.User.ButtonSize + 10; // 增加间距，从5改为10
 
             if (accounts != null)
             {
@@ -740,25 +740,66 @@ namespace SAM.Views
 
                         accountButton.Style = (Style)Resources["SAMButtonStyle"];
                         accountButton.Tag = account;
+                        accountButton.Margin = new Thickness(0, 2, 0, 2); // 增加按钮上下边距
 
                         if (account.Alias != null && account.Alias.Length > 0)
                         {
-                            accountText.Text = account.Alias;
+                            // 如果别名过长，每隔8个字符添加一个换行符，确保文本能够换行显示
+                            string alias = account.Alias;
+                            if (alias.Length > 8)
+                            {
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 0; i < alias.Length; i++)
+                                {
+                                    sb.Append(alias[i]);
+                                    if ((i + 1) % 8 == 0 && i < alias.Length - 1)
+                                    {
+                                        sb.Append(Environment.NewLine);
+                                    }
+                                }
+                                accountText.Text = sb.ToString();
+                            }
+                            else
+                            {
+                                accountText.Text = alias;
+                            }
                         }
                         else
                         {
-                            accountText.Text = account.Name;
+                            // 同样处理用户名
+                            string name = account.Name;
+                            if (name.Length > 8)
+                            {
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 0; i < name.Length; i++)
+                                {
+                                    sb.Append(name[i]);
+                                    if ((i + 1) % 8 == 0 && i < name.Length - 1)
+                                    {
+                                        sb.Append(Environment.NewLine);
+                                    }
+                                }
+                                accountText.Text = sb.ToString();
+                            }
+                            else
+                            {
+                                accountText.Text = name;
+                            }
                         }
 
-                        // If there is a description, set up tooltip.
-                        if (account.Description != null && account.Description.Length > 0)
+                        // 将鼠标悬浮提示改为显示账号别名(Alias)
+                        if (account.Alias != null && account.Alias.Length > 0)
                         {
-                            accountButton.ToolTip = account.Description;
+                            accountButton.ToolTip = account.Alias;
+                        }
+                        else
+                        {
+                            accountButton.ToolTip = account.Name;
                         }
 
                         accountButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
                         accountButtonGrid.VerticalAlignment = VerticalAlignment.Top;
-                        accountButtonGrid.Margin = new Thickness(xCounter * buttonOffset, yCounter * buttonOffset, 0, 0);
+                        accountButtonGrid.Margin = new Thickness(10 + xCounter * buttonOffset, yCounter * buttonOffset, 0, 0); // 添加左侧间隙10像素
 
                         accountButton.Height = settings.User.ButtonSize;
                         accountButton.Width = settings.User.ButtonSize;
@@ -781,11 +822,12 @@ namespace SAM.Views
                         accountText.HorizontalAlignment = HorizontalAlignment.Center;
                         accountText.VerticalAlignment = VerticalAlignment.Bottom;
                         accountText.Margin = new Thickness(0, 0, 0, 7);
-                        accountText.Padding = new Thickness(0, 0, 0, 1);
+                        accountText.Padding = new Thickness(2, 2, 2, 2); // 增加内边距，使文本显示更美观
                         accountText.TextAlignment = TextAlignment.Center;
                         accountText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.BannerFontColor));
                         accountText.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonBannerColor));
                         accountText.Visibility = Visibility.Collapsed;
+                        accountText.TextWrapping = TextWrapping.Wrap; // 添加文本换行
 
                         timeoutTextBlock.Width = settings.User.ButtonSize;
                         timeoutTextBlock.FontSize = settings.User.ButtonSize / 8;
@@ -1726,10 +1768,28 @@ namespace SAM.Views
 
             WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
 
+            int maxWaitTime = 30; // 最大等待时间，单位：秒
+            int waitCounter = 0;
+            
             while (!steamLoginWindow.IsValid)
             {
                 Thread.Sleep(100);
                 steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
+                
+                // 检查Steam主窗口是否已打开，如果已打开则说明已成功登录
+                if (WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
+                {
+                    PostLogin();
+                    return;
+                }
+                
+                // 超时检查
+                waitCounter++;
+                if (waitCounter >= maxWaitTime * 10) // 100ms * 10 = 1秒
+                {
+                    MessageBox.Show("等待Steam登录窗口超时，可能已经登录成功或Steam出现异常", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
             }
 
             LoginWindowState state = LoginWindowState.None;
@@ -2124,7 +2184,9 @@ namespace SAM.Views
 
         private void AccountButton_MouseEnter(Button accountButton, TextBlock accountText)
         {
-            accountText.Visibility = Visibility.Visible;
+            // 确保文本可见并且能够换行显示
+            //accountText.Visibility = Visibility.Visible;
+            //accountText.Height = Double.NaN; // 自动调整高度以适应换行文本
         }
 
         private void AccountButton_MouseMove(object sender, MouseEventArgs e)

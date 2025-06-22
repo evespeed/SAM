@@ -22,7 +22,7 @@
         <!-- This style is used for buttons, to remove the WPF default 'animated' mouse over effect -->
         <Style x:Key="SAMButtonStyle" TargetType="Button">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Margin" Value="5,8,5,8"/> <!-- 增加上下边距 -->
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -30,13 +30,18 @@
                             BorderThickness="2"
                             Padding="4,2" 
                             BorderBrush="DarkGray" 
-                            CornerRadius="3" 
+                            CornerRadius="5" 
                             Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#FF00DCFF" />
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#FF00DCFF" ShadowDepth="0" BlurRadius="10" Opacity="0.7" />
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <!--<Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Opacity" Value="0.5" />
@@ -125,13 +130,9 @@
                         </Style>
                     </DataGrid.ColumnHeaderStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name" IsReadOnly="True">
-                            <DataGridTextColumn.Binding>
-                                <MultiBinding Converter="{StaticResource PriorityMultiValueConverter}">
-                                    <Binding Path="Alias" />
-                                    <Binding Path="Name" />
-                                </MultiBinding>
-                            </DataGridTextColumn.Binding>
+                        <DataGridTextColumn Header="Name" IsReadOnly="True" Binding="{Binding Name}">
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Alias" IsReadOnly="True" Binding="{Binding Alias}">
                         </DataGridTextColumn>
                         <DataGridTextColumn Header="Description" MaxWidth="250" Binding="{Binding Description}" IsReadOnly="True">
                             <DataGridTextColumn.ElementStyle>
