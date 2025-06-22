@@ -742,49 +742,14 @@ namespace SAM.Views
                         accountButton.Tag = account;
                         accountButton.Margin = new Thickness(0, 2, 0, 2); // 增加按钮上下边距
 
+                        // 设置文本内容为账号别名或账号名
                         if (account.Alias != null && account.Alias.Length > 0)
                         {
-                            // 如果别名过长，每隔8个字符添加一个换行符，确保文本能够换行显示
-                            string alias = account.Alias;
-                            if (alias.Length > 8)
-                            {
-                                StringBuilder sb = new StringBuilder();
-                                for (int i = 0; i < alias.Length; i++)
-                                {
-                                    sb.Append(alias[i]);
-                                    if ((i + 1) % 8 == 0 && i < alias.Length - 1)
-                                    {
-                                        sb.Append(Environment.NewLine);
-                                    }
-                                }
-                                accountText.Text = sb.ToString();
-                            }
-                            else
-                            {
-                                accountText.Text = alias;
-                            }
+                            accountText.Text = account.Alias;
                         }
                         else
                         {
-                            // 同样处理用户名
-                            string name = account.Name;
-                            if (name.Length > 8)
-                            {
-                                StringBuilder sb = new StringBuilder();
-                                for (int i = 0; i < name.Length; i++)
-                                {
-                                    sb.Append(name[i]);
-                                    if ((i + 1) % 8 == 0 && i < name.Length - 1)
-                                    {
-                                        sb.Append(Environment.NewLine);
-                                    }
-                                }
-                                accountText.Text = sb.ToString();
-                            }
-                            else
-                            {
-                                accountText.Text = name;
-                            }
+                            accountText.Text = account.Name;
                         }
 
                         // 将鼠标悬浮提示改为显示账号别名(Alias)
@@ -809,6 +774,7 @@ namespace SAM.Views
                         accountButton.Background = Brushes.Transparent;
                         accountButton.Cursor = Cursors.Hand;
 
+                        // 设置文本宽度，确保能够正常显示
                         accountText.Width = settings.User.ButtonSize;
                         if (settings.User.ButtonFontSize > 0)
                         {
@@ -820,14 +786,14 @@ namespace SAM.Views
                         }
 
                         accountText.HorizontalAlignment = HorizontalAlignment.Center;
-                        accountText.VerticalAlignment = VerticalAlignment.Bottom;
-                        accountText.Margin = new Thickness(0, 0, 0, 7);
+                        accountText.VerticalAlignment = VerticalAlignment.Center;
+                        accountText.Margin = new Thickness(0, 7, 0, 0);
                         accountText.Padding = new Thickness(2, 2, 2, 2); // 增加内边距，使文本显示更美观
                         accountText.TextAlignment = TextAlignment.Center;
-                        accountText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.BannerFontColor));
-                        accountText.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonBannerColor));
-                        accountText.Visibility = Visibility.Collapsed;
+                        accountText.Foreground = Brushes.Black;
+                        accountText.Background = Brushes.Transparent;
                         accountText.TextWrapping = TextWrapping.Wrap; // 添加文本换行
+                        accountText.Visibility = Visibility.Visible; // 确保文本可见
 
                         timeoutTextBlock.Width = settings.User.ButtonSize;
                         timeoutTextBlock.FontSize = settings.User.ButtonSize / 8;
@@ -844,7 +810,7 @@ namespace SAM.Views
                         offlineModeTextBlock.FontSize = settings.User.ButtonSize / 10;
                         offlineModeTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
                         offlineModeTextBlock.VerticalAlignment = VerticalAlignment.Top;
-                        offlineModeTextBlock.Margin = new Thickness(0, 5, 0, 0);
+                        offlineModeTextBlock.Margin = new Thickness(0, 0, 0, 0);
                         offlineModeTextBlock.Padding = new Thickness(2, 0, 2, 0);
                         offlineModeTextBlock.TextAlignment = TextAlignment.Center;
                         offlineModeTextBlock.Foreground = new SolidColorBrush(Colors.White);
@@ -888,15 +854,6 @@ namespace SAM.Views
                             accountImage.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonColor));
                             accountButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonFontColor));
                             timeoutTextBlock.Margin = new Thickness(0, 0, 0, 50);
-
-                            if (account.Alias != null && account.Alias.Length > 0)
-                            {
-                                accountButton.Content = account.Alias;
-                            }
-                            else
-                            {
-                                accountButton.Content = account.Name;
-                            }
                         }
                         else
                         {
@@ -915,15 +872,6 @@ namespace SAM.Views
                                 accountImage.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonColor));
                                 accountButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonFontColor));
                                 timeoutTextBlock.Margin = new Thickness(0, 0, 0, 50);
-
-                                if (account.Alias != null && account.Alias.Length > 0)
-                                {
-                                    accountButton.Content = account.Alias;
-                                }
-                                else
-                                {
-                                    accountButton.Content = account.Name;
-                                }
                             }
                         }
 
@@ -2179,14 +2127,14 @@ namespace SAM.Views
 
         private void AccountButton_MouseLeave(Button accountButton, TextBlock accountText)
         {
-            accountText.Visibility = Visibility.Collapsed;
+            // 鼠标离开时恢复原来的文字颜色
+            accountText.Foreground = Brushes.Black;
         }
 
         private void AccountButton_MouseEnter(Button accountButton, TextBlock accountText)
         {
-            // 确保文本可见并且能够换行显示
-            //accountText.Visibility = Visibility.Visible;
-            //accountText.Height = Double.NaN; // 自动调整高度以适应换行文本
+            // 鼠标悬浮时文字变红
+            accountText.Foreground = Brushes.Red;
         }
 
         private void AccountButton_MouseMove(object sender, MouseEventArgs e)
