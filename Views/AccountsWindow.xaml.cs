@@ -812,6 +812,29 @@ namespace SAM.Views
                         // 根据账号的离线模式设置决定是否显示离线登录标签
                         offlineModeTextBlock.Visibility = account.OfflineMode ? Visibility.Visible : Visibility.Collapsed;
 
+                        // 添加最后登录时间文本块
+                        var lastLoginTextBlock = new TextBlock();
+                        lastLoginTextBlock.Width = settings.User.ButtonSize;
+                        lastLoginTextBlock.FontSize = settings.User.ButtonSize / 10;
+                        lastLoginTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
+                        lastLoginTextBlock.VerticalAlignment = VerticalAlignment.Bottom;
+                        lastLoginTextBlock.Margin = new Thickness(0, 0, 0, 0);
+                        lastLoginTextBlock.Padding = new Thickness(2, 0, 2, 0);
+                        lastLoginTextBlock.TextAlignment = TextAlignment.Center;
+                        lastLoginTextBlock.Foreground = new SolidColorBrush(Colors.White);
+                        lastLoginTextBlock.Background = new SolidColorBrush(new Color { A = 180, R = 0, G = 180, B = 0 });
+                        
+                        // 设置最后登录时间文本
+                        if (account.LastLoginTime != null)
+                        {
+                            lastLoginTextBlock.Text = ((DateTime)account.LastLoginTime).ToString("MM-dd HH:mm");
+                            lastLoginTextBlock.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            lastLoginTextBlock.Visibility = Visibility.Collapsed;
+                        }
+
                         accountImage.Height = settings.User.ButtonSize;
                         accountImage.Width = settings.User.ButtonSize;
                         accountImage.HorizontalAlignment = HorizontalAlignment.Center;
@@ -898,6 +921,7 @@ namespace SAM.Views
                         accountButtonGrid.Children.Add(accountText);
                         accountButtonGrid.Children.Add(accountButton);
                         accountButtonGrid.Children.Add(offlineModeTextBlock);
+                        accountButtonGrid.Children.Add(lastLoginTextBlock);
 
                         if (!settings.User.HideBanIcons && (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0))
                         {
