@@ -1574,7 +1574,7 @@ namespace SAM.Views
             SetWindowTitle("Working");
             LoginWindowState state = LoginWindowState.None;
 
-            while (state != LoginWindowState.Success && state != LoginWindowState.Code)
+            while (state != LoginWindowState.Success && state != LoginWindowState.Code && state != LoginWindowState.Invalid)
             {
                 if (steamProcess.HasExited || state == LoginWindowState.Error)
                 {
@@ -1598,6 +1598,14 @@ namespace SAM.Views
                 }
             }
 
+            // 如果是Invalid状态，可能是Steam已经成功登录并且登录窗口已关闭
+            // 检查Steam主窗口是否已打开
+            if (state == LoginWindowState.Invalid && WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
+            {
+                PostLogin();
+                return;
+            }
+
             if (account.SharedSecret != null && account.SharedSecret.Length > 0)
             {
                 EnterReact2FA(steamProcess, account, tryCount);
@@ -1611,6 +1619,12 @@ namespace SAM.Views
                 {
                     Thread.Sleep(100);
                     state = WindowUtils.GetLoginWindowState(steamLoginWindow);
+                    
+                    // 检查Steam主窗口是否已打开
+                    if (state == LoginWindowState.Invalid && WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
+                    {
+                        break;
+                    }
                 }
 
                 PostLogin();
@@ -1666,7 +1680,7 @@ namespace SAM.Views
             LoginWindowState state = LoginWindowState.None;
             string secret = StringCipher.Decrypt(account.SharedSecret, eKey);
 
-            while (state != LoginWindowState.Success)
+            while (state != LoginWindowState.Success && state != LoginWindowState.Invalid)
             {
                 if (steamProcess.HasExited || state == LoginWindowState.Error)
                 {
@@ -1693,6 +1707,13 @@ namespace SAM.Views
                 }
             }
 
+            // 如果是Invalid状态，检查Steam主窗口是否已打开
+            if (state == LoginWindowState.Invalid && WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
+            {
+                PostLogin();
+                return;
+            }
+
             Thread.Sleep(settings.User.SleepTime);
             state = LoginWindowState.Loading;
 
@@ -1700,6 +1721,12 @@ namespace SAM.Views
             {
                 Thread.Sleep(100);
                 state = WindowUtils.GetLoginWindowState(steamLoginWindow);
+                
+                // 检查Steam主窗口是否已打开
+                if (state == LoginWindowState.Invalid && WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
+                {
+                    break;
+                }
             }
 
             steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
