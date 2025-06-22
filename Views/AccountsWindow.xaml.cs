@@ -978,7 +978,7 @@ namespace SAM.Views
                         }
 
                         int newHeight = (buttonOffset * (yCounter + 1)) + 57;
-                        int newWidth = (buttonOffset * xVal) + 7;
+                        int newWidth = (buttonOffset * xVal) + 17; // 增加右边距为10像素，与左边距保持一致
 
                         Resize(newHeight, newWidth);
 
@@ -990,7 +990,7 @@ namespace SAM.Views
                     else
                     {
                         // Reset New Button position.
-                        Resize(180, 138);
+                        Resize(180, 148); // 增加窗口宽度，确保左右边距一致
 
                         AddButtonGrid.HorizontalAlignment = HorizontalAlignment.Center;
                         AddButtonGrid.VerticalAlignment = VerticalAlignment.Center;
